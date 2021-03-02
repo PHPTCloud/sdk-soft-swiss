@@ -1,0 +1,9 @@
+{
+    "name": "phptcloud/sdk-soft-swiss",
+    "description": "SDK for SoftSwiss platform",
+    "autoload": {
+        "psr-4": {
+            "SoftSwiss\\": "src/"
+        }
+    }
+}
