@@ -11,9 +11,9 @@ use SoftSwiss\Exceptions\InvalidRequestException;
 /**
  * Initialization params
  */
-const DOMAIN = 'samuraipartners.com';
-const LOGIN = 'm.margera@alflaeads.net';
-const PASSWORD = 'Alfaleads123';
+const DOMAIN = 'domain';
+const LOGIN = 'login';
+const PASSWORD = 'password';
 /**
  * Client initialization by 
  * - domain name
