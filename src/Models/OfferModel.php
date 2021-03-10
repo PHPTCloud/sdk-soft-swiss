@@ -24,7 +24,7 @@ class OfferModel
     private $landings;
 
     /**
-     * @var PaymentArgs
+     * @var PaymentArgumentsModel
      */
     private $commission;
 
@@ -83,18 +83,18 @@ class OfferModel
     }
 
     /**
-     * @return PaymentArgs|null
+     * @return PaymentArgumentsModel|null
      */
-    public function getCommission(): ?PaymentArgs
+    public function getCommission(): ?PaymentArgumentsModel
     {
         return $this->commission;
     }
 
     /**
-     * @param PaymentArgs $commission
+     * @param PaymentArgumentsModel $commission
      * @return self
      */
-    public function setCommission($commission): self
+    public function setCommission(PaymentArgumentsModel $commission): self
     {
         $this->commission = $commission;
         return $this;
@@ -138,10 +138,11 @@ class OfferModel
         if(isset($array['commission']))
         {
             $array['commission'] = (array) $array['commission'];
-            $paymentsArgs = [];
-            $paymentsArgs->setCurrency($array['commission']['fiat_currency']);
-            $paymentsArgs->setTitle($array['commission']['title']);
-            $this->setCommission($paymentsArgs);
+            $paymentArguments = new PaymentArgumentsModel(
+                $array['commission']['title'],
+                $array['commission']['fiat_currency']
+            );
+            $this->setCommission($paymentArguments);
         }
 
         return $this;

@@ -7,6 +7,7 @@
 namespace SoftSwiss;
 
 use Illuminate\Http\Response;
+use SoftSwiss\Dictionaries\ChromeUserAgentsDictionary;
 use SoftSwiss\Exceptions\InvalidRequestException;
 
 class ApiRequest
@@ -29,7 +30,12 @@ class ApiRequest
     /**
      * @var string
      */
-    protected const USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36';
+    protected const COOKIE_PATH = __DIR__ . '/storage/cookie/';
+
+    /**
+     * @var string
+     */
+    protected const COOKIE_FILENAME = 'cookies.txt';
 
     /**
      * @var string
@@ -111,26 +117,6 @@ class ApiRequest
     }
 
     /**
-     * @return string|null
-     */
-    public function getCookieFilePath(): ?string
-    {
-        return (!empty($this->cookieFilePath))
-            ? $this->cookieFilePath
-            : __DIR__;
-    }
-
-    /**
-     * @param string $cookieFilePath 
-     * @return self
-     */
-    public function setCookieFilePath(string $cookieFilePath): self
-    {
-        $this->cookieFilePath = $cookieFilePath;
-        return $this;
-    }
-
-    /**
      * @param string $login
      * @param string $password
      * @param string $domain
@@ -149,9 +135,17 @@ class ApiRequest
      */
     public function __invoke(string $login, string $password, string $domain)
     {
-        $this->domain = self::HTTP_SCHEME . '://' . $domain;
+        $this->domain = $domain;
         $this->login = $login;
         $this->password = $password;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getCookieFilePath(): ?string
+    {
+        return static::COOKIE_PATH . static::COOKIE_FILENAME;
     }
 
     /**
@@ -220,7 +214,7 @@ class ApiRequest
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_SSL_VERIFYHOST => false,
             CURLOPT_HTTPHEADER => [
-                'User-Agent: ' . self::USER_AGENT,
+                'User-Agent: ' . ChromeUserAgentsDictionary::USER_AGENT_0,
             ],
         ];
         /**
@@ -239,7 +233,7 @@ class ApiRequest
         }
         catch(InvalidRequestException $e)
         {
-            return $e;
+            throw $e;
         }
     }
 
@@ -281,9 +275,8 @@ class ApiRequest
             $response = $this->request($defaultParams);
             return $response;
         }
-        catch(InvalidRequestException $e)
-        {
-            return $e;
+        catch(InvalidRequestException $e) {
+            throw $e;
         }
     }
 
@@ -305,16 +298,34 @@ class ApiRequest
             return $response;
         }
         else if($responseCode === Response::HTTP_NOT_FOUND) {
-            throw new InvalidRequestException(Response::$statusTexts[Response::HTTP_NOT_FOUND]);
+            throw new InvalidRequestException(
+                'Request url:' . $params[CURLOPT_URL] . ': exception ' .
+                Response::$statusTexts[Response::HTTP_NOT_FOUND]
+            );
         }
         else if($responseCode === Response::HTTP_BAD_REQUEST) {
-            throw new InvalidRequestException(Response::$statusTexts[Response::HTTP_BAD_REQUEST]);
+            throw new InvalidRequestException(
+                'Request url:' . $params[CURLOPT_URL] . ': exception ' .
+                Response::$statusTexts[Response::HTTP_BAD_REQUEST]
+            );
         }
         else if($responseCode === Response::HTTP_BAD_GATEWAY) {
-            throw new InvalidRequestException(Response::$statusTexts[Response::HTTP_BAD_GATEWAY]);
+            throw new InvalidRequestException(
+                'Request url:' . $params[CURLOPT_URL] . ': exception ' .
+                Response::$statusTexts[Response::HTTP_BAD_GATEWAY]
+            );
         }
         else if($responseCode === Response::HTTP_INTERNAL_SERVER_ERROR) {
-            throw new InvalidRequestException(Response::$statusTexts[Response::HTTP_INTERNAL_SERVER_ERROR]);
+            throw new InvalidRequestException(
+                'Request url:' . $params[CURLOPT_URL] . ': exception ' .
+                Response::$statusTexts[Response::HTTP_INTERNAL_SERVER_ERROR]
+            );
+        }
+        else if($responseCode === Response::HTTP_METHOD_NOT_ALLOWED) {
+            throw new InvalidRequestException(
+                'Request url:' . $params[CURLOPT_URL] . ': exception ' .
+                Response::$statusTexts[Response::HTTP_METHOD_NOT_ALLOWED]
+            );
         }
 
         $this->closeConnection();
