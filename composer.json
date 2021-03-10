@@ -1,6 +1,9 @@
 {
-    "name": "phptcloud/sdk-soft-swiss",
-    "description": "SDK for SoftSwiss platform",
+    "name": "phptcloud/sdksoftswiss",
+    "require": {
+        "illuminate/support": "^8.30",
+        "illuminate/http": "^8.30"
+    },
     "autoload": {
         "psr-4": {
             "SoftSwiss\\": "src/"

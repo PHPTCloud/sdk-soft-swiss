@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @class ApiRequest
  * @package SoftSwiss
@@ -7,7 +6,7 @@
 
 namespace SoftSwiss;
 
-use App\Core\HttpResponse;
+use Illuminate\Http\Response;
 use SoftSwiss\Exceptions\InvalidRequestException;
 
 class ApiRequest
@@ -16,11 +15,6 @@ class ApiRequest
      * @var string
      */
     private const HTTP_SCHEME = 'https';
-
-    /**
-     * @var string
-     */
-    protected const COOKIE_FILE_PATH = '/importers/SoftSwiss.txt';
 
     /**
      * @var string
@@ -56,6 +50,11 @@ class ApiRequest
      * @var resource
      */
     private $connection;
+
+    /**
+     * @var string
+     */
+    private $cookieFilePath;
 
     /**
      * @param string $domain
@@ -109,6 +108,26 @@ class ApiRequest
     public function getConnection()
     {
         return $this->connection;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getCookieFilePath(): ?string
+    {
+        return (!empty($this->cookieFilePath))
+            ? $this->cookieFilePath
+            : __DIR__;
+    }
+
+    /**
+     * @param string $cookieFilePath 
+     * @return self
+     */
+    public function setCookieFilePath(string $cookieFilePath): self
+    {
+        $this->cookieFilePath = $cookieFilePath;
+        return $this;
     }
 
     /**
@@ -209,8 +228,8 @@ class ApiRequest
          */
         if($includeCookie === true)
         {
-            $defaultParams[CURLOPT_COOKIEJAR] = storage_path('app/cookie') . self::COOKIE_FILE_PATH;
-            $defaultParams[CURLOPT_COOKIEFILE] = storage_path('app/cookie') . self::COOKIE_FILE_PATH;
+            $defaultParams[CURLOPT_COOKIEJAR] = $this->getCookieFilePath();
+            $defaultParams[CURLOPT_COOKIEFILE] = $this->getCookieFilePath();
         }
 
         try
@@ -253,8 +272,8 @@ class ApiRequest
          */
         if($includeCookie === true)
         {
-            $defaultParams[CURLOPT_COOKIEJAR] = storage_path('app/cookie') . self::COOKIE_FILE_PATH;
-            $defaultParams[CURLOPT_COOKIEFILE] = storage_path('app/cookie') . self::COOKIE_FILE_PATH;
+            $defaultParams[CURLOPT_COOKIEJAR] = $this->getCookieFilePath();
+            $defaultParams[CURLOPT_COOKIEFILE] = $this->getCookieFilePath();
         }
 
         try
@@ -282,20 +301,20 @@ class ApiRequest
         $response = curl_exec($connection);
         $responseCode = curl_getinfo($connection, CURLINFO_HTTP_CODE);
 
-        if($responseCode === HttpResponse::HTTP_OK || $responseCode === HttpResponse::HTTP_CREATED) {
+        if($responseCode === Response::HTTP_OK || $responseCode === Response::HTTP_CREATED) {
             return $response;
         }
-        else if($responseCode === HttpResponse::HTTP_NOT_FOUND) {
-            throw new InvalidRequestException(HttpResponse::$statusTexts[HttpResponse::HTTP_NOT_FOUND]);
+        else if($responseCode === Response::HTTP_NOT_FOUND) {
+            throw new InvalidRequestException(Response::$statusTexts[Response::HTTP_NOT_FOUND]);
         }
-        else if($responseCode === HttpResponse::HTTP_BAD_REQUEST) {
-            throw new InvalidRequestException(HttpResponse::$statusTexts[HttpResponse::HTTP_BAD_REQUEST]);
+        else if($responseCode === Response::HTTP_BAD_REQUEST) {
+            throw new InvalidRequestException(Response::$statusTexts[Response::HTTP_BAD_REQUEST]);
         }
-        else if($responseCode === HttpResponse::HTTP_BAD_GATEWAY) {
-            throw new InvalidRequestException(HttpResponse::$statusTexts[HttpResponse::HTTP_BAD_GATEWAY]);
+        else if($responseCode === Response::HTTP_BAD_GATEWAY) {
+            throw new InvalidRequestException(Response::$statusTexts[Response::HTTP_BAD_GATEWAY]);
         }
-        else if($responseCode === HttpResponse::HTTP_INTERNAL_SERVER_ERROR) {
-            throw new InvalidRequestException(HttpResponse::$statusTexts[HttpResponse::HTTP_INTERNAL_SERVER_ERROR]);
+        else if($responseCode === Response::HTTP_INTERNAL_SERVER_ERROR) {
+            throw new InvalidRequestException(Response::$statusTexts[Response::HTTP_INTERNAL_SERVER_ERROR]);
         }
 
         $this->closeConnection();

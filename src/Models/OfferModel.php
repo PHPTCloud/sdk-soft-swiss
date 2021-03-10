@@ -6,8 +6,6 @@
 
 namespace SoftSwiss\Models;
 
-use App\Services\Importer\ImportedArgs\PaymentArgs;
-
 class OfferModel
 {
     /**
@@ -96,7 +94,7 @@ class OfferModel
      * @param PaymentArgs $commission
      * @return self
      */
-    public function setCommission(PaymentArgs $commission): self
+    public function setCommission($commission): self
     {
         $this->commission = $commission;
         return $this;
@@ -105,7 +103,7 @@ class OfferModel
     public function __construct()
     {
         $this->landings = new OffersLandingsModelsCollection();
-        $this->commission = new PaymentArgs();
+        $this->commission = [];
     }
 
     /**
@@ -140,7 +138,7 @@ class OfferModel
         if(isset($array['commission']))
         {
             $array['commission'] = (array) $array['commission'];
-            $paymentsArgs = new PaymentArgs();
+            $paymentsArgs = [];
             $paymentsArgs->setCurrency($array['commission']['fiat_currency']);
             $paymentsArgs->setTitle($array['commission']['title']);
             $this->setCommission($paymentsArgs);
